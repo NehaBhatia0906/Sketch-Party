@@ -703,13 +703,13 @@
         min-width: 200px;
       }
     }
-    
+
     .mobile-tabs {
       display: none;
       gap: 10px;
       margin-bottom: 10px;
     }
-     
+
     .tab-btn {
       flex: 1;
       padding: 10px;
@@ -720,70 +720,72 @@
       border-radius: 4px;
       font-size: 1.2em;
     }
-     
+
     .tab-btn.active {
       background: #00ffff;
       color: #000;
     }
-     
+
     @media (max-width: 768px) {
       body {
         flex-direction: column;
         padding: 10px;
       }
-      
+
       .game-container {
         flex-direction: column;
       }
-      
+
       .canvas-section {
         flex: 1;
-        min-height: 50vh; /* Canvas takes top half */
+        min-height: 50vh;
+        /* Canvas takes top half */
       }
-      
+
       .sidebar {
         width: 100%;
         max-height: 50vh;
-        flex-direction: column; /* Use tabs instead */
+        flex-direction: column;
+        /* Use tabs instead */
       }
-      
+
       .mobile-tabs {
         display: flex;
       }
-      
+
       .panel {
         flex-shrink: 0;
         width: 100%;
       }
-      
+
       canvas {
         height: 50vh;
       }
-      
+
       .info-section {
         flex: none;
         height: 40vh;
       }
     }
-     
+
     @media (max-width: 480px) {
       body {
         padding: 5px;
       }
-      
+
       .game-container {
         padding: 5px;
         gap: 5px;
       }
-      
+
       .header h1 {
         font-size: 1.5em;
       }
-      
+
       canvas {
         height: 45vh;
       }
-      
+
       button {
         padding: 8px 12px;
         font-size: 0.85em;
@@ -872,7 +874,7 @@
             <button class="tab-btn" onclick="showTab('colors')">🌈</button>
             <button class="tab-btn" onclick="showTab('effects')">✨</button>
           </div>
-          
+
           <div class="panel" id="brush-tab" style="display: block;">
             <div class="control-group">
               <label>Size</label>
@@ -880,10 +882,11 @@
             </div>
             <div class="control-group">
               <label>Opacity</label>
-              <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="0.8" oninput="updateOpacity(this.value)">
+              <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="0.8"
+                oninput="updateOpacity(this.value)">
             </div>
           </div>
-          
+
           <div class="panel" id="colors-tab" style="display: none;">
             <div class="color-grid" style="margin-bottom:0;">
               <div class="color-btn active" style="background: #00ffff;" onclick="setColor('#00ffff')"></div>
@@ -892,10 +895,12 @@
               <div class="color-btn" style="background: #ffff00;" onclick="setColor('#ffff00')"></div>
               <div class="color-btn" style="background: #ff0088;" onclick="setColor('#ff0088')"></div>
               <div class="color-btn" style="background: #ffffff;" onclick="setColor('#ffffff')"></div>
-              <input type="color" id="customColor" value="#00ffff" style="width: 100%; height: 100%; padding:0; border:none; cursor:pointer;" onchange="setColor(this.value)">
+              <input type="color" id="customColor" value="#00ffff"
+                style="width: 100%; height: 100%; padding:0; border:none; cursor:pointer;"
+                onchange="setColor(this.value)">
             </div>
           </div>
-          
+
           <div class="panel" id="effects-tab" style="display: none;">
             <div class="effect-grid">
               <button class="effect-btn active" onclick="setEffect('normal')">Normal</button>
@@ -1241,7 +1246,7 @@
 
       canvasWidth = rect.width;
       canvasHeight = rect.height;
-      
+
       // Update canvas resolution
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
@@ -1617,7 +1622,7 @@
     // ============= CAMERA CONTROL =============
     async function toggleCamera() {
       const closeBtn = document.getElementById('camera-close-btn');
-      
+
       if (cameraActive) {
         // FIX #1 — stop camera robustly
         if (mpCamera) {
@@ -1687,10 +1692,10 @@
       document.getElementById('brush-tab').style.display = 'none';
       document.getElementById('colors-tab').style.display = 'none';
       document.getElementById('effects-tab').style.display = 'none';
-      
+
       // Show selected tab
       document.getElementById(tabName + '-tab').style.display = 'block';
-      
+
       // Update active button
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
