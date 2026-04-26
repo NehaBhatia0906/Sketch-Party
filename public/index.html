@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SketchParty 🎨</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0f2e 0%, #1a1a4d 100%);
+      color: #e0e0e0;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    h1 {
+      font-size: 2.8em;
+      background: linear-gradient(90deg, #00ffff, #ff00ff, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      margin-bottom: 30px;
+      font-size: 0.95em;
+    }
+
+    .card {
+      background: rgba(20, 20, 50, 0.9);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 14px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.08);
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 1em;
+      color: #00ffff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.15);
+      padding-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 1em;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #00ffff;
+    }
+
+    input[type="text"]::placeholder {
+      color: #555;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.25s;
+      margin-bottom: 10px;
+    }
+
+    .btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #00ffff, #0099cc);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 255, 0.35);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(90deg, #ff00ff, #cc00cc);
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 0, 255, 0.35);
+    }
+
+    .btn-green {
+      background: linear-gradient(90deg, #00ff88, #00cc66);
+      color: #000;
+    }
+
+    .btn-green:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 136, 0.35);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .error {
+      color: #ff4466;
+      font-size: 0.85em;
+      margin-top: -8px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .room-code {
+      font-size: 2.2em;
+      font-weight: bold;
+      letter-spacing: 8px;
+      color: #00ff88;
+      text-align: center;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-family: monospace;
+    }
+
+    .copy-hint {
+      text-align: center;
+      color: #555;
+      font-size: 0.8em;
+      margin-top: -10px;
+      margin-bottom: 16px;
+    }
+
+    .player-list {
+      list-style: none;
+    }
+
+    .player-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      font-size: 0.95em;
+    }
+
+    .player-list li .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1em;
+      background: rgba(0, 255, 255, 0.15);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      flex-shrink: 0;
+    }
+
+    .player-list li .host-badge {
+      font-size: 0.7em;
+      background: rgba(255, 215, 0, 0.2);
+      color: gold;
+      border: 1px solid rgba(255, 215, 0, 0.4);
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-left: auto;
+    }
+
+    .waiting-hint {
+      text-align: center;
+      color: #555;
+      font-size: 0.85em;
+      margin-top: 8px;
+    }
+
+    #game-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0f0f2e;
+      z-index: 100;
+    }
+
+    #game-screen.active {
+      display: block;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 4px 0 14px;
+      color: #444;
+      font-size: 0.85em;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* GAME SCREEN LAYOUT */
+    #game-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0f0f2e;
+      z-index: 100;
+    }
+
+    #game-screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .game-container {
+      display: flex;
+      flex: 1;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+      gap: 20px;
+      overflow: hidden;
+    }
+
+    .canvas-section {
+      flex: 6;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      position: relative;
+      min-width: 0;
+    }
+
+    .info-section {
+      flex: 4;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      background: rgba(20, 20, 50, 0.5);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      padding: 15px;
+      min-width: 300px;
+      overflow-y: auto;
+    }
+
+    #game-info {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 255, 0.3);
+    }
+
+    #current-drawer {
+      color: #888;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+    }
+
+    #word-hint {
+      font-size: 2.5em;
+      letter-spacing: 5px;
+      color: #00ffff;
+      font-family: monospace;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    #timer {
+      font-size: 1.5em;
+      color: #ff00ff;
+      font-weight: bold;
+    }
+
+    #chat-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      overflow: hidden;
+    }
+
+    #guess-input {
+      width: 100%;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      border: none;
+      border-top: 1px solid rgba(0, 255, 255, 0.2);
+      color: #fff;
+      font-size: 1.1em;
+      outline: none;
+    }
+
+    #guess-input:focus {
+      background: rgba(0, 255, 255, 0.05);
+    }
+
+    #scoreboard {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      border: 1px solid rgba(0, 255, 255, 0.1);
+    }
+
+    #scoreboard h3 {
+      color: #00ff88;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+      padding-bottom: 5px;
+    }
+
+    #player-scores {
+      list-style: none;
+    }
+
+    #player-scores li {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .game-tools {
+      display: flex;
+      gap: 15px;
+      background: rgba(20, 20, 50, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* Inherited Hand Canvas CSS */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .canvas-wrapper {
+      position: relative;
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+      min-height: 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #000a1a;
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      cursor: crosshair;
+    }
+
+    video {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      width: 240px;
+      height: 180px;
+      border: 2px solid rgba(0, 255, 255, 0.5);
+      border-radius: 8px;
+      z-index: 10;
+      transform: scaleX(-1);
+      background: #000;
+      display: none;
+    }
+
+    .overlay-info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(0, 255, 255, 0.5);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      color: #00ffff;
+      z-index: 10;
+    }
+
+    .overlay-info.active {
+      color: #00ff88;
+      border-color: #00ff88;
+    }
+
+    .hand-indicator {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #ff00ff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      display: none;
+      box-shadow: 0 0 15px #ff00ff, inset 0 0 15px rgba(255, 0, 255, 0.5);
+    }
+
+    .coord-display {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.8);
+      border: 1px solid rgba(0, 255, 255, 0.5);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.8em;
+      color: #00ffff;
+      font-family: monospace;
+      z-index: 10;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 16px;
+      background: linear-gradient(90deg, #00ffff, #0099cc);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95em;
+      flex: 1;
+      min-width: 140px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
+    }
+
+    button.secondary {
+      background: linear-gradient(90deg, #ff00ff, #cc00ff);
+    }
+
+    button.secondary:hover {
+      box-shadow: 0 8px 20px rgba(255, 0, 255, 0.4);
+    }
+
+    .sidebar {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      max-height: calc(100vh - 40px);
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 255, 0.4);
+      border-radius: 3px;
+    }
+
+    .panel {
+      background: rgba(20, 20, 50, 0.9);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel h2 {
+      font-size: 0.95em;
+      color: #00ffff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+      padding-bottom: 8px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      font-size: 0.8em;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(0, 255, 255, 0.2);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #00ffff;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #00ffff;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
+    }
+
+    .value-display {
+      font-size: 0.75em;
+      color: #00ff88;
+      text-align: right;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .color-btn {
+      aspect-ratio: 1;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .color-btn:hover {
+      transform: scale(1.1);
+      border-color: #fff;
+    }
+
+    .color-btn.active {
+      border-color: #fff;
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .effect-btn {
+      padding: 6px 8px;
+      background: rgba(0, 255, 255, 0.2);
+      border: 1px solid rgba(0, 255, 255, 0.5);
+      border-radius: 4px;
+      color: #00ffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.8em;
+      font-weight: bold;
+    }
+
+    .effect-btn:hover {
+      background: rgba(0, 255, 255, 0.4);
+    }
+
+    .effect-btn.active {
+      background: #00ffff;
+      color: #000;
+    }
+
+    .effect-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .info-box {
+      background: rgba(0, 20, 40, 0.6);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.8em;
+      line-height: 1.5;
+      color: #00ffff;
+    }
+
+    .camera-btn {
+      padding: 8px 12px;
+      background: linear-gradient(90deg, #00ff88, #00cc66);
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      width: 100%;
+      font-size: 0.95em;
+    }
+
+    .camera-btn:hover {
+      box-shadow: 0 8px 20px rgba(0, 255, 136, 0.4);
+    }
+
+    @media (max-width: 1024px) {
+
+
+      .sidebar {
+        width: 100%;
+        max-height: 250px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+
+      .panel {
+        flex: 1;
+        min-width: 200px;
+      }
+
+
+    }
+
+
+    /* Overrides for integration */
+    .canvas-wrapper {
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- LOBBY SCREEN -->
+  <div id="lobby-screen" class="screen active">
+    <h1>🎨 SketchParty</h1>
+    <p class="subtitle">Draw it. Guess it. Win it.</p>
+
+    <div class="card">
+      <h2>👤 Your Name</h2>
+      <input type="text" id="player-name" placeholder="Enter your name..." maxlength="20">
+      <div class="error" id="name-error">Please enter your name first!</div>
+    </div>
+
+    <div class="card">
+      <h2>🏠 Create a Room</h2>
+      <button class="btn btn-primary" onclick="createRoom()">✨ Create New Room</button>
+    </div>
+
+    <div class="card">
+      <h2>🔗 Join a Room</h2>
+      <input type="text" id="room-code-input" placeholder="Enter room code (e.g. AB12CD)" maxlength="6"
+        style="text-transform:uppercase; letter-spacing:3px; font-family:monospace;">
+      <div class="error" id="join-error" id="join-error"></div>
+      <button class="btn btn-secondary" onclick="joinRoom()">🚀 Join Room</button>
+    </div>
+  </div>
+
+  <!-- WAITING ROOM SCREEN -->
+  <div id="waiting-screen" class="screen">
+    <h1>🎨 SketchParty</h1>
+    <p class="subtitle" id="waiting-subtitle">Waiting for players...</p>
+
+    <div class="card">
+      <h2>📋 Room Code</h2>
+      <div class="room-code" id="display-room-code">------</div>
+      <p class="copy-hint">Share this code with friends to join!</p>
+      <button class="btn btn-primary" onclick="copyCode()">📋 Copy Code</button>
+    </div>
+
+    <div class="card">
+      <h2>👥 Players (<span id="player-count">0</span>/12)</h2>
+      <ul class="player-list" id="player-list"></ul>
+      <p class="waiting-hint" id="waiting-hint">Waiting for more players...</p>
+    </div>
+
+    <div id="host-controls" style="display:none;">
+      <button class="btn btn-green" id="start-btn" onclick="startGame()" disabled>
+        Need 2+ players to start
+      </button>
+    </div>
+    <div id="guest-hint" style="display:none;">
+      <p class="waiting-hint">⏳ Waiting for host to start the game...</p>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN (placeholder) -->
+
+  <div id="game-screen">
+    <div class="game-container">
+      <div class="canvas-section">
+        <div class="game-tools">
+          <button class="camera-btn" onclick="toggleCamera()" id="cameraBtn" style="flex:0 0 auto; width: 200px;">📷
+            Enable Hand Camera</button>
+
+          <div style="display:flex; flex-direction:column; width: 120px;">
+            <label style="font-size:10px; color:#aaa;">Size</label>
+            <input type="range" id="brushSize" min="2" max="50" value="10" oninput="updateBrushSize(this.value)">
+          </div>
+
+          <div style="display:flex; flex-direction:column; width: 120px;">
+            <label style="font-size:10px; color:#aaa;">Opacity</label>
+            <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="0.8"
+              oninput="updateOpacity(this.value)">
+          </div>
+
+          <div class="color-grid" style="margin-bottom:0; flex:1; display:flex; gap:5px;">
+            <div class="color-btn active" style="background: #00ffff; width:25px; height:25px;"
+              onclick="setColor('#00ffff')"></div>
+            <div class="color-btn" style="background: #ff00ff; width:25px; height:25px;" onclick="setColor('#ff00ff')">
+            </div>
+            <div class="color-btn" style="background: #00ff88; width:25px; height:25px;" onclick="setColor('#00ff88')">
+            </div>
+            <div class="color-btn" style="background: #ffff00; width:25px; height:25px;" onclick="setColor('#ffff00')">
+            </div>
+            <div class="color-btn" style="background: #ff0088; width:25px; height:25px;" onclick="setColor('#ff0088')">
+            </div>
+            <div class="color-btn" style="background: #ffffff; width:25px; height:25px;" onclick="setColor('#ffffff')">
+            </div>
+            <input type="color" id="customColor" value="#00ffff"
+              style="width: 25px; height: 25px; padding:0; border:none; cursor:pointer;"
+              onchange="setColor(this.value)">
+          </div>
+
+          <button onclick="undoAction()" style="flex:0 0 auto; width: 80px; padding: 5px;">↩️ Undo</button>
+          <button onclick="clearCanvas()" style="flex:0 0 auto; width: 80px; padding: 5px;">🗑️ Clear</button>
+        </div>
+
+        <div class="effect-grid" style="display:flex; gap:10px;">
+          <button class="effect-btn active" onclick="setEffect('normal')">Normal</button>
+          <button class="effect-btn" onclick="setEffect('glow')">Glow</button>
+          <button class="effect-btn" onclick="setEffect('blur')">Blur</button>
+          <button class="effect-btn" onclick="setEffect('rainbow')">Rainbow</button>
+          <button class="effect-btn" onclick="setEffect('particle')">Particle</button>
+          <button class="effect-btn" onclick="setEffect('trail')">Trail</button>
+        </div>
+
+        <div class="canvas-wrapper" style="flex:1;">
+          <canvas id="game-canvas"></canvas>
+          <video id="video" width="640" height="480"></video>
+          <div class="hand-indicator" id="handIndicator"></div>
+          <div class="overlay-info" id="status">🖱️ Ready</div>
+          <div class="coord-display" id="coordDisplay"></div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div id="game-info">
+          <p id="current-drawer">Waiting...</p>
+          <div id="word-hint">_ _ _ _</div>
+          <div id="timer">90s</div>
+        </div>
+
+        <div id="chat-box" style="display:flex; flex-direction:column;">
+          <div id="chat-messages"
+            style="flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:5px;"></div>
+          <input id="guess-input" placeholder="Type your guess..." disabled />
+        </div>
+
+        <div id="scoreboard">
+          <h3>🏆 Scoreboard</h3>
+          <ul id="player-scores">
+            <!-- Scores injected here -->
+          </ul>
+        </div>
+
+        <div id="cameraInfo" style="font-size:0.8em; color:#888; text-align:center;">⏳ Loading hand detection...</div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/hands.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1632432234/camera_utils.js"
+    crossorigin="anonymous"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    let myRoomId = null;
+    let amHost = false;
+    let myName = '';
+
+    // ── Helpers ──────────────────────────────────────────────────────
+    function showScreen(id) {
+      document.querySelectorAll('.screen, #game-screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (id === 'game-screen' && typeof resizeCanvas === 'function') {
+        setTimeout(resizeCanvas, 100); // Allow DOM to render before resizing
+      }
+    }
+
+    function showError(el, msg) {
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    function getAvatarEmoji(name) {
+      const emojis = ['🦊', '🐼', '🐸', '🦄', '🐯', '🦁', '🐙', '🦋', '🐧', '🦅', '🐳', '🦊'];
+      let hash = 0;
+      for (const c of name) hash += c.charCodeAt(0);
+      return emojis[hash % emojis.length];
+    }
+
+    // ── Actions ──────────────────────────────────────────────────────
+    function createRoom() {
+      const nameInput = document.getElementById('player-name');
+      const nameErr = document.getElementById('name-error');
+      myName = nameInput.value.trim();
+      if (!myName) { showError(nameErr, 'Please enter your name first!'); return; }
+      socket.emit('create_room', { name: myName });
+    }
+
+    function joinRoom() {
+      const nameInput = document.getElementById('player-name');
+      const nameErr = document.getElementById('name-error');
+      const codeInput = document.getElementById('room-code-input');
+      const joinErr = document.getElementById('join-error');
+
+      myName = nameInput.value.trim();
+      if (!myName) { showError(nameErr, 'Please enter your name first!'); return; }
+
+      const roomId = codeInput.value.trim().toUpperCase();
+      if (roomId.length < 4) { showError(joinErr, 'Enter a valid room code!'); return; }
+
+      socket.emit('join_room', { name: myName, roomId });
+    }
+
+    function startGame() {
+      socket.emit('start_game');
+    }
+
+    function copyCode() {
+      navigator.clipboard.writeText(myRoomId).then(() => {
+        const btn = event.target;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+      });
+    }
+
+    // ── Socket events ────────────────────────────────────────────────
+    socket.on('room_created', ({ roomId }) => {
+      myRoomId = roomId;
+      amHost = true;
+      document.getElementById('display-room-code').textContent = roomId;
+      document.getElementById('waiting-subtitle').textContent = 'You created the room!';
+      document.getElementById('host-controls').style.display = 'block';
+      document.getElementById('guest-hint').style.display = 'none';
+      showScreen('waiting-screen');
+    });
+
+    socket.on('room_joined', ({ roomId }) => {
+      myRoomId = roomId;
+      amHost = false;
+      document.getElementById('display-room-code').textContent = roomId;
+      document.getElementById('waiting-subtitle').textContent = 'You joined the room!';
+      document.getElementById('host-controls').style.display = 'none';
+      document.getElementById('guest-hint').style.display = 'block';
+      showScreen('waiting-screen');
+    });
+
+    socket.on('players_update', (players) => {
+      // Scoreboard update
+      const scoreList = document.getElementById('player-scores');
+      if (scoreList) {
+        scoreList.innerHTML = players.sort((a, b) => b.score - a.score).map(p => `
+            <li>
+                <span>${getAvatarEmoji(p.name)} ${p.name}</span>
+                <span style="color:#00ffff; font-weight:bold;">${p.score}</span>
+            </li>
+        `).join('');
+      }
+      const list = document.getElementById('player-list');
+      const count = document.getElementById('player-count');
+      const startBtn = document.getElementById('start-btn');
+      const hint = document.getElementById('waiting-hint');
+
+      count.textContent = players.length;
+      list.innerHTML = players.map((p, i) => `
+      <li>
+        <span class="avatar">${getAvatarEmoji(p.name)}</span>
+        <span>${p.name}</span>
+        ${i === 0 ? '<span class="host-badge">👑 Host</span>' : ''}
+      </li>
+    `).join('');
+
+      if (amHost) {
+        if (players.length >= 2) {
+          startBtn.disabled = false;
+          startBtn.textContent = '🎮 Start Game!';
+        } else {
+          startBtn.disabled = true;
+          startBtn.textContent = 'Need 2+ players to start';
+        }
+      }
+      hint.style.display = players.length < 2 ? 'block' : 'none';
+    });
+
+    socket.on('join_error', (msg) => {
+      showError(document.getElementById('join-error'), '❌ ' + msg);
+    });
+
+    socket.on('system_msg', ({ text }) => {
+      console.log('[System]', text);
+    });
+
+    // ── Phase 3: Turn System & Timer ────────────────────────────────
+    let roundTimerInterval;
+    let roundEndTimeMs = 0;
+
+    function startTimer(duration) {
+      clearInterval(roundTimerInterval);
+      roundEndTimeMs = Date.now() + duration * 1000;
+
+      roundTimerInterval = setInterval(() => {
+        const remaining = Math.max(0, Math.ceil((roundEndTimeMs - Date.now()) / 1000));
+        updateTimerDisplay(remaining);
+        if (remaining <= 0) clearInterval(roundTimerInterval);
+      }, 1000);
+      updateTimerDisplay(duration);
+    }
+
+    function updateTimerDisplay(seconds) {
+      const timerEl = document.getElementById('timer');
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerEl.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      if (seconds > 30) timerEl.style.color = '#00ff88'; // Green
+      else if (seconds >= 10) timerEl.style.color = '#ffff00'; // Yellow
+      else timerEl.style.color = '#ff00ff'; // Red
+    }
+
+    function addChatMessage(msg, color) {
+      const msgContainer = document.getElementById('chat-messages');
+      if (!msgContainer) return;
+      const msgEl = document.createElement('div');
+      msgEl.style.padding = '4px 8px';
+      msgEl.style.color = color || '#fff';
+      msgEl.style.backgroundColor = 'rgba(0,0,0,0.2)';
+      msgEl.style.borderRadius = '4px';
+      msgEl.textContent = msg;
+
+      msgContainer.appendChild(msgEl);
+
+      while (msgContainer.children.length > 50) {
+        msgContainer.removeChild(msgContainer.firstChild);
+      }
+      msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    socket.on('your_turn', (data) => {
+      showScreen('game-screen');
+      document.getElementById('current-drawer').textContent = `You are drawing!`;
+      document.getElementById('word-hint').textContent = data.word;
+      const guessInput = document.getElementById('guess-input');
+      if (guessInput) {
+        guessInput.disabled = true;
+        guessInput.placeholder = "You are drawing!";
+      }
+      startTimer(data.duration);
+
+      // Enable drawing tools
+      const canvasWrapper = document.querySelector('.canvas-wrapper');
+      const gameTools = document.querySelector('.game-tools');
+      if (canvasWrapper) canvasWrapper.style.pointerEvents = 'auto';
+      if (gameTools) {
+        gameTools.style.opacity = '1';
+        gameTools.style.pointerEvents = 'auto';
+      }
+    });
+
+    socket.on('round_start', (data) => {
+      showScreen('game-screen');
+      document.getElementById('current-drawer').textContent = `${data.drawerName} is drawing`;
+      document.getElementById('word-hint').textContent = data.wordHint.split('').join(' ');
+      const guessInput = document.getElementById('guess-input');
+      if (guessInput) {
+        guessInput.disabled = false;
+        guessInput.placeholder = "Type your guess...";
+        guessInput.focus();
+      }
+      startTimer(data.duration);
+
+      // Disable drawing tools
+      const canvasWrapper = document.querySelector('.canvas-wrapper');
+      const gameTools = document.querySelector('.game-tools');
+      if (canvasWrapper) canvasWrapper.style.pointerEvents = 'none';
+      if (gameTools) {
+        gameTools.style.opacity = '0.5';
+        gameTools.style.pointerEvents = 'none';
+      }
+    });
+
+    socket.on('correct_guess', (data) => {
+      addChatMessage(`✅ ${data.name} guessed correctly!`, '#00ff88');
+    });
+
+    socket.on('chat_msg', (data) => {
+      addChatMessage(`❌ ${data.name}: ${data.text}`, '#ff4466');
+    });
+
+    socket.on('round_end', (data) => {
+      clearInterval(roundTimerInterval);
+      document.getElementById('word-hint').textContent = data.word;
+      addChatMessage(`Round ended! The word was: ${data.word}`, '#00ffff');
+
+      // Show round end screen details briefly in chat
+      if (data.scores) {
+        data.scores.sort((a, b) => b.score - a.score);
+      }
+      addChatMessage(`Scores updated!`, '#ffff00');
+    });
+
+    socket.on('game_over', (data) => {
+      clearInterval(roundTimerInterval);
+      addChatMessage(`Game Over! Check the scoreboard.`, '#ff00ff');
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const guessInput = document.getElementById('guess-input');
+      if (guessInput) {
+        guessInput.addEventListener('keypress', function (e) {
+          if (e.key === 'Enter') {
+            const text = this.value.trim();
+            if (text) {
+              socket.emit('guess', { text });
+              this.value = '';
+            }
+          }
+        });
+      }
+    });
+
+    socket.on('you_are_host', () => {
+      amHost = true;
+      document.getElementById('host-controls').style.display = 'block';
+      document.getElementById('guest-hint').style.display = 'none';
+    });
+
+
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    const video = document.getElementById('video');
+    const statusDiv = document.getElementById('status');
+    const handIndicator = document.getElementById('handIndicator');
+    const cameraInfo = document.getElementById('cameraInfo');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const coordDisplay = document.getElementById('coordDisplay');
+
+    let canvasWidth = 0;
+    let canvasHeight = 0;
+
+    function resizeCanvas() {
+      const wrapper = canvas.parentElement;
+      if (!wrapper) return;
+      const rect = wrapper.getBoundingClientRect();
+
+      let imageData = null;
+      if (canvasWidth > 0 && canvasHeight > 0) {
+        imageData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+      }
+
+      canvasWidth = rect.width;
+      canvasHeight = rect.height;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      ctx.fillStyle = '#000a1a';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      if (imageData) {
+        ctx.putImageData(imageData, 0, 0);
+      }
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // ============= BRUSH SETTINGS =============
+    let brushSize = 10;
+    let opacity = 0.8;
+    let currentColor = '#00ffff';
+    let currentEffect = 'normal';
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let history = [];
+    const MAX_HISTORY = 20;
+
+    // ============= SMOOTHING STATE =============
+    let smoothedX = 0;
+    let smoothedY = 0;
+
+    let handX = 0;
+    let handY = 0;
+    const INDICATOR_ALPHA = 0.5;
+
+    let targetX = 0;
+    let targetY = 0;
+
+    let strokeActive = false;
+
+    const PINCH_FRAMES_ON = 3;
+    const PINCH_FRAMES_OFF = 2;
+    let pinchCounter = 0;
+    let stableDrawing = false;
+
+    let lastDrawTime = 0;
+    const DRAW_INTERVAL = 16;
+    const MAX_JUMP = 100;
+
+    // Hand detection
+    let mpHands = null;       // MediaPipe Hands instance
+    let mpCamera = null;      // MediaPipe Camera utility
+    let cameraActive = false;
+    let isPinching = false;
+    let handDetected = false;
+    let modelLoaded = false;
+
+    // Detection dropout grace period
+    const HAND_GRACE_FRAMES = 12;
+    let handLostCounter = 0;
+
+    // ============= LOAD MODEL (MediaPipe Hands) =============
+    async function loadModel() {
+      try {
+        cameraInfo.textContent = '⏳ Loading model...';
+        cameraInfo.style.color = '#ffaa00';
+
+        mpHands = new Hands({
+          locateFile: (file) =>
+            `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`
+        });
+
+        mpHands.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,           // 0=lite, 1=full — use full for accuracy
+          minDetectionConfidence: 0.7,
+          minTrackingConfidence: 0.6
+        });
+
+        mpHands.onResults(onHandResults);
+
+        // Warm up the model so first frame isn't slow
+        await mpHands.initialize();
+
+        modelLoaded = true;
+        cameraInfo.textContent = '✅ Ready! Click camera button.';
+        cameraInfo.style.color = '#00ff88';
+        console.log('✅ MediaPipe Hands loaded');
+      } catch (err) {
+        console.error('Model error:', err);
+        cameraInfo.textContent = '⚠️ Hand detection unavailable';
+        cameraInfo.style.color = '#ffaa00';
+      }
+    }
+
+    window.addEventListener('load', loadModel);
+
+    // ============= DRAWING FUNCTIONS =============
+
+    // --- Pressure: clamp size based on movement speed ---
+    function calcPressure(speed) {
+      // speed in px/frame; slow = thick, fast = thin
+      // map [0 .. 30] speed → pressure [1.4 .. 0.5]
+      const minPressure = 0.5;
+      const maxPressure = 1.4;
+      const normalizedSpeed = Math.min(speed, 30) / 30;
+      return maxPressure - (maxPressure - minPressure) * normalizedSpeed;
+    }
+
+    // --- Core brush stamp ---
+    function drawBrush(x, y, pressure = 1) {
+      const size = Math.max(1, brushSize * pressure);
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = currentColor;
+
+      if (currentEffect === 'normal') {
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      else if (currentEffect === 'glow') {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 2);
+        gradient.addColorStop(0, currentColor);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(x, y, size * 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = currentColor;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      else if (currentEffect === 'blur') {
+        ctx.filter = `blur(${size * 0.5}px)`;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.filter = 'none';
+      }
+      else if (currentEffect === 'rainbow') {
+        const hue = (Date.now() * 0.1) % 360;
+        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      else if (currentEffect === 'particle') {
+        for (let i = 0; i < 3; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const distance = Math.random() * size;
+          const px = x + Math.cos(angle) * distance;
+          const py = y + Math.sin(angle) * distance;
+          ctx.beginPath();
+          ctx.arc(px, py, size * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      else if (currentEffect === 'trail') {
+        for (let i = 0; i < 5; i++) {
+          ctx.globalAlpha = opacity * (1 - i / 5);
+          ctx.beginPath();
+          ctx.arc(x - i * 2, y, size - i, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawSmoothLine(x1, y1, x2, y2, pressure = 1, emit = true) {
+      if (emit && (isDrawing || stableDrawing)) {
+        socket.emit('draw_event', {
+          x1: x1 / canvasWidth,
+          y1: y1 / canvasHeight,
+          x2: x2 / canvasWidth,
+          y2: y2 / canvasHeight,
+          color: currentColor,
+          brushSize: brushSize,
+          effect: currentEffect,
+          opacity: opacity,
+          type: 'draw_line'
+        });
+      }
+
+      const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+
+      if (distance < 1) {
+        drawBrush(x2, y2, pressure);
+        return;
+      }
+
+      const steps = Math.ceil(distance);
+      const stepSize = 1 / steps;
+
+      for (let t = 0; t <= 1; t += stepSize) {
+        const x = x1 + (x2 - x1) * t;
+        const y = y1 + (y2 - y1) * t;
+        drawBrush(x, y, pressure);
+      }
+
+      drawBrush(x2, y2, pressure);
+    }
+
+    // ============= MOUSE EVENTS =============
+    canvas.addEventListener('mousedown', (e) => {
+      if (cameraActive) return;
+      isDrawing = true;
+      saveHistory();
+      socket.emit('draw_event', { type: 'start_stroke' });
+      const rect = canvas.getBoundingClientRect();
+      lastX = e.clientX - rect.left;
+      lastY = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing || cameraActive) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      drawSmoothLine(lastX, lastY, x, y);
+      lastX = x;
+      lastY = y;
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+    });
+
+    // ============= MEDIAPIPE RESULTS CALLBACK =============
+    // Called by MediaPipe every frame — replaces the old predictLoop()
+    function onHandResults(results) {
+      if (!cameraActive) return;
+
+      if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        const lm = results.multiHandLandmarks[0];
+
+        // Key landmarks:
+        //  0  = wrist
+        //  6  = index PIP (middle knuckle)
+        //  8  = index tip
+        // 10  = middle PIP
+        // 12  = middle tip
+        const indexTip = lm[8];
+        const indexPIP = lm[6];
+        const middleTip = lm[12];
+        const middlePIP = lm[10];
+
+        // Finger extended = tip.y < PIP.y  (y increases downward in normalized coords)
+        const indexExtended = indexTip.y < indexPIP.y - 0.02; // small tolerance
+        const middleExtended = middleTip.y < middlePIP.y - 0.02;
+
+        // DRAW gesture = index extended, middle curled
+        const wantsDraw = indexExtended && !middleExtended;
+
+        // Hysteresis: easier to keep current state than to switch
+        if (isPinching && !wantsDraw && middleExtended) isPinching = false;
+        else if (!isPinching && wantsDraw) isPinching = true;
+
+        // MediaPipe coords are already normalized [0,1]; flip X for mirror
+        targetX = (1 - indexTip.x) * canvasWidth;
+        targetY = indexTip.y * canvasHeight;
+
+        handDetected = true;
+        handLostCounter = 0;
+      } else {
+        // Grace period — tolerate brief dropouts without breaking strokes
+        handLostCounter++;
+        if (handLostCounter >= HAND_GRACE_FRAMES) {
+          handDetected = false;
+          isPinching = false;
+        }
+      }
+    }
+
+    function drawLoop() {
+      if (!cameraActive) return;
+
+      const now = Date.now();
+
+      if (handDetected) {
+        // Initialize smoothed values on first detection
+        if (smoothedX === 0 && smoothedY === 0) {
+          smoothedX = targetX;
+          smoothedY = targetY;
+        }
+
+        // Apply exponential smoothing (0.75 factor for better stability)
+        smoothedX = smoothedX * 0.75 + targetX * 0.25;
+        smoothedY = smoothedY * 0.75 + targetY * 0.25;
+
+        handX = Math.max(0, Math.min(canvasWidth, smoothedX));
+        handY = Math.max(0, Math.min(canvasHeight, smoothedY));
+
+        if (isPinching) {
+          pinchCounter = Math.min(pinchCounter + 1, PINCH_FRAMES_ON + 5);
+        } else {
+          pinchCounter = Math.max(pinchCounter - 1, -(PINCH_FRAMES_OFF + 5));
+        }
+        if (!stableDrawing && pinchCounter >= PINCH_FRAMES_ON) stableDrawing = true;
+        if (stableDrawing && pinchCounter <= -PINCH_FRAMES_OFF) stableDrawing = false;
+
+        // ── Update cursor indicator ──
+        handIndicator.style.display = 'block';
+        handIndicator.style.left = (handX - 15) + 'px';
+        handIndicator.style.top = (handY - 15) + 'px';
+
+        if (stableDrawing) {
+          handIndicator.style.borderColor = '#00ff88';
+          handIndicator.style.boxShadow = '0 0 15px #00ff88, inset 0 0 15px rgba(0,255,136,0.5)';
+
+          if (now - lastDrawTime > DRAW_INTERVAL) {
+            if (lastX === 0 && lastY === 0) {
+              lastX = handX;
+              lastY = handY;
+            }
+
+            const jumpDistance = Math.hypot(handX - lastX, handY - lastY);
+
+            // Hand Position Validation - ignore teleport jumps
+            if (jumpDistance > MAX_JUMP) {
+              lastX = handX;
+              lastY = handY;
+              lastDrawTime = now;
+              requestAnimationFrame(drawLoop);
+              return;
+            }
+
+            if (!strokeActive) {
+              strokeActive = true;
+              saveHistory();
+              socket.emit('draw_event', { type: 'start_stroke' });
+            }
+
+            // IMPORTANT: Always draw, even small movements
+            drawSmoothLine(lastX, lastY, handX, handY);
+            lastX = handX;
+            lastY = handY;
+            lastDrawTime = now;
+          }
+          coordDisplay.textContent = `X: ${Math.round(handX)} Y: ${Math.round(handY)}`;
+        } else {
+          handIndicator.style.borderColor = '#ff00ff';
+          handIndicator.style.boxShadow = '0 0 15px #ff00ff, inset 0 0 15px rgba(255,0,255,0.5)';
+          if (strokeActive) {
+            strokeActive = false;
+          }
+          lastX = 0; lastY = 0;
+          coordDisplay.textContent = `X: ${Math.round(handX)} Y: ${Math.round(handY)}`;
+        }
+
+      } else {
+        // Hand lost — full reset
+        handIndicator.style.display = 'none';
+        coordDisplay.textContent = '';
+        lastX = 0; lastY = 0;
+        handX = 0; handY = 0;
+        smoothedX = 0; smoothedY = 0;
+        strokeActive = false;
+        pinchCounter = 0;
+        stableDrawing = false;
+        handLostCounter = 0;
+      }
+
+      requestAnimationFrame(drawLoop);
+    }
+
+    // ============= CAMERA CONTROL =============
+    async function toggleCamera() {
+      if (cameraActive) {
+        // FIX #1 — stop camera robustly
+        if (mpCamera) {
+          try { mpCamera.stop(); } catch (e) { console.warn('mpCamera.stop():', e); }
+          mpCamera = null;
+        }
+        // Belt-and-suspenders: also kill the video track directly
+        if (video.srcObject) {
+          video.srcObject.getTracks().forEach(t => t.stop());
+          video.srcObject = null;
+        }
+        cameraActive = false;
+        video.style.display = 'none';
+        handIndicator.style.display = 'none';
+        lastX = lastY = 0;
+        handX = 0; handY = 0;
+        smoothedX = 0; smoothedY = 0;
+        strokeActive = false;
+        pinchCounter = 0;
+        stableDrawing = false;
+        handLostCounter = 0;
+        statusDiv.textContent = '🖱️ Ready';
+        statusDiv.classList.remove('active');
+        cameraBtn.textContent = '📷 Enable Hand Camera';
+        cameraInfo.textContent = '✅ Stopped';
+        cameraInfo.style.color = '#00ff88';
+      } else {
+        if (!modelLoaded) {
+          cameraInfo.textContent = '⏳ Model loading...';
+          return;
+        }
+
+        try {
+          // MediaPipe Camera utility handles getUserMedia + frame pumping automatically
+          mpCamera = new Camera(video, {
+            onFrame: async () => {
+              if (mpHands && cameraActive) {
+                await mpHands.send({ image: video });
+              }
+            },
+            width: 640,
+            height: 480
+          });
+
+          await mpCamera.start();
+
+          video.style.display = 'block';
+          cameraActive = true;
+          statusDiv.textContent = '👋 Hand Mode';
+          statusDiv.classList.add('active');
+          cameraBtn.textContent = '⏹️ Stop Camera';
+          cameraInfo.textContent = '✅ Camera on!';
+          cameraInfo.style.color = '#00ff88';
+          drawLoop(); // start render loop
+        } catch (err) {
+          cameraInfo.textContent = '❌ ' + err.message;
+          cameraInfo.style.color = '#ff0088';
+        }
+      }
+    }
+
+    // ============= CONTROLS =============
+    function updateBrushSize(value) {
+      brushSize = parseInt(value);
+      const valDisplay = document.getElementById('brushSizeVal');
+      if (valDisplay) valDisplay.textContent = value + 'px';
+    }
+
+    function updateOpacity(value) {
+      opacity = parseFloat(value);
+      const opDisplay = document.getElementById('opacityVal');
+      if (opDisplay) opDisplay.textContent = Math.round(opacity * 100) + '%';
+    }
+
+    function setColor(color) {
+      currentColor = color;
+      document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function setEffect(effect) {
+      currentEffect = effect;
+      document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function clearCanvas() {
+      saveHistory();
+      ctx.fillStyle = '#000a1a';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    }
+
+    function saveHistory() {
+      if (history.length >= MAX_HISTORY) history.shift();
+      history.push(canvas.toDataURL());
+    }
+
+    function undoAction() {
+      if (history.length > 0) {
+        const img = new Image();
+        img.src = history.pop();
+        img.onload = () => {
+          ctx.fillStyle = '#000a1a';
+          ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+          ctx.drawImage(img, 0, 0);
+        };
+      }
+    }
+
+    function saveImage() {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL();
+      link.download = 'hand-canvas-' + Date.now() + '.png';
+      link.click();
+    }
+
+    // ============= INITIALIZE =============
+    ctx.fillStyle = '#000a1a';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    saveHistory();
+
+    console.log('✅ Hand Canvas ready for Antigravity');
+
+    // ============= MULTIPLAYER DRAW SYNC =============
+    socket.on('draw_event', (data) => {
+      if (data.type === 'clear') {
+        // saveHistory() is not strictly needed here unless we want to undo a clear remotely,
+        // but local clearCanvas() calls it. For simplicity, just mirror the clear.
+        ctx.fillStyle = '#000a1a';
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        return;
+      }
+      if (data.type === 'undo') {
+        if (history.length > 0) {
+          const img = new Image();
+          img.src = history.pop();
+          img.onload = () => {
+            ctx.fillStyle = '#000a1a';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.drawImage(img, 0, 0);
+          };
+        }
+        return;
+      }
+      if (data.type === 'start_stroke') {
+        saveHistory();
+        return;
+      }
+      // Only render if we aren't the ones who drew it (prevent double draw)
+      // The server will broadcast to everyone EXCEPT the sender in the room.
+      if (data.type === 'draw_line' || data.x1 !== undefined) {
+        const fromX = data.x1 * canvasWidth;
+        const fromY = data.y1 * canvasHeight;
+        const toX = data.x2 * canvasWidth;
+        const toY = data.y2 * canvasHeight;
+
+        // Temporarily set brush settings to match incoming stroke
+        const prevColor = currentColor;
+        const prevSize = brushSize;
+        const prevEffect = currentEffect;
+        const prevOpacity = opacity;
+
+        currentColor = data.color;
+        brushSize = data.brushSize;
+        currentEffect = data.effect;
+        opacity = data.opacity;
+
+        // Draw without emitting
+        drawSmoothLine(fromX, fromY, toX, toY, 1, false);
+
+        // Restore previous settings
+        currentColor = prevColor;
+        brushSize = prevSize;
+        currentEffect = prevEffect;
+        opacity = prevOpacity;
+      }
+    });
+
+    socket.on('clear_canvas', () => {
+      ctx.fillStyle = '#000a1a';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    });
+
+    // Override clearCanvas to emit
+    const originalClearCanvas = clearCanvas;
+    clearCanvas = function () {
+      originalClearCanvas();
+      socket.emit('draw_event', { type: 'clear' });
+    }
+
+    const originalUndoAction = undoAction;
+    undoAction = function () {
+      originalUndoAction();
+      socket.emit('draw_event', { type: 'undo' });
+    }
+
+  </script>
+</body>
+
+</html>
