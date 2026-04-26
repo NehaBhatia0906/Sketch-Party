@@ -691,8 +691,6 @@
     }
 
     @media (max-width: 1024px) {
-
-
       .sidebar {
         width: 100%;
         max-height: 250px;
@@ -704,10 +702,93 @@
         flex: 1;
         min-width: 200px;
       }
-
-
     }
-
+    
+    .mobile-tabs {
+      display: none;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+     
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: rgba(0, 255, 255, 0.2);
+      border: 1px solid rgba(0, 255, 255, 0.5);
+      color: #00ffff;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 1.2em;
+    }
+     
+    .tab-btn.active {
+      background: #00ffff;
+      color: #000;
+    }
+     
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        padding: 10px;
+      }
+      
+      .game-container {
+        flex-direction: column;
+      }
+      
+      .canvas-section {
+        flex: 1;
+        min-height: 50vh; /* Canvas takes top half */
+      }
+      
+      .sidebar {
+        width: 100%;
+        max-height: 50vh;
+        flex-direction: column; /* Use tabs instead */
+      }
+      
+      .mobile-tabs {
+        display: flex;
+      }
+      
+      .panel {
+        flex-shrink: 0;
+        width: 100%;
+      }
+      
+      canvas {
+        height: 50vh;
+      }
+      
+      .info-section {
+        flex: none;
+        height: 40vh;
+      }
+    }
+     
+    @media (max-width: 480px) {
+      body {
+        padding: 5px;
+      }
+      
+      .game-container {
+        padding: 5px;
+        gap: 5px;
+      }
+      
+      .header h1 {
+        font-size: 1.5em;
+      }
+      
+      canvas {
+        height: 45vh;
+      }
+      
+      button {
+        padding: 8px 12px;
+        font-size: 0.85em;
+      }
+    }
 
     /* Overrides for integration */
     .canvas-wrapper {
@@ -776,53 +857,63 @@
   <div id="game-screen">
     <div class="game-container">
       <div class="canvas-section">
-        <div class="game-tools">
-          <button class="camera-btn" onclick="toggleCamera()" id="cameraBtn" style="flex:0 0 auto; width: 200px;">📷
-            Enable Hand Camera</button>
-
-          <div style="display:flex; flex-direction:column; width: 120px;">
-            <label style="font-size:10px; color:#aaa;">Size</label>
-            <input type="range" id="brushSize" min="2" max="50" value="10" oninput="updateBrushSize(this.value)">
-          </div>
-
-          <div style="display:flex; flex-direction:column; width: 120px;">
-            <label style="font-size:10px; color:#aaa;">Opacity</label>
-            <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="0.8"
-              oninput="updateOpacity(this.value)">
-          </div>
-
-          <div class="color-grid" style="margin-bottom:0; flex:1; display:flex; gap:5px;">
-            <div class="color-btn active" style="background: #00ffff; width:25px; height:25px;"
-              onclick="setColor('#00ffff')"></div>
-            <div class="color-btn" style="background: #ff00ff; width:25px; height:25px;" onclick="setColor('#ff00ff')">
-            </div>
-            <div class="color-btn" style="background: #00ff88; width:25px; height:25px;" onclick="setColor('#00ff88')">
-            </div>
-            <div class="color-btn" style="background: #ffff00; width:25px; height:25px;" onclick="setColor('#ffff00')">
-            </div>
-            <div class="color-btn" style="background: #ff0088; width:25px; height:25px;" onclick="setColor('#ff0088')">
-            </div>
-            <div class="color-btn" style="background: #ffffff; width:25px; height:25px;" onclick="setColor('#ffffff')">
-            </div>
-            <input type="color" id="customColor" value="#00ffff"
-              style="width: 25px; height: 25px; padding:0; border:none; cursor:pointer;"
-              onchange="setColor(this.value)">
-          </div>
-
-          <button onclick="undoAction()" style="flex:0 0 auto; width: 80px; padding: 5px;">↩️ Undo</button>
-          <button onclick="clearCanvas()" style="flex:0 0 auto; width: 80px; padding: 5px;">🗑️ Clear</button>
+        <div class="button-row">
+          <button class="camera-btn" onclick="toggleCamera()" id="cameraBtn">
+            📷 Camera
+          </button>
+          <button onclick="clearCanvas()">🗑️ Clear</button>
+          <button onclick="undoAction()">↶ Undo</button>
+          <button onclick="saveImage()" class="secondary">💾 Save</button>
         </div>
 
-        <div class="effect-grid" style="display:flex; gap:10px;">
-          <button class="effect-btn active" onclick="setEffect('normal')">Normal</button>
-          <button class="effect-btn" onclick="setEffect('glow')">Glow</button>
-          <button class="effect-btn" onclick="setEffect('blur')">Blur</button>
-          <button class="effect-btn" onclick="setEffect('rainbow')">Rainbow</button>
-          <button class="effect-btn" onclick="setEffect('particle')">Particle</button>
-          <button class="effect-btn" onclick="setEffect('trail')">Trail</button>
+        <div class="sidebar">
+          <div class="mobile-tabs">
+            <button class="tab-btn active" onclick="showTab('brush')">🎨</button>
+            <button class="tab-btn" onclick="showTab('colors')">🌈</button>
+            <button class="tab-btn" onclick="showTab('effects')">✨</button>
+          </div>
+          
+          <div class="panel" id="brush-tab" style="display: block;">
+            <div class="control-group">
+              <label>Size</label>
+              <input type="range" id="brushSize" min="2" max="50" value="10" oninput="updateBrushSize(this.value)">
+            </div>
+            <div class="control-group">
+              <label>Opacity</label>
+              <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="0.8" oninput="updateOpacity(this.value)">
+            </div>
+          </div>
+          
+          <div class="panel" id="colors-tab" style="display: none;">
+            <div class="color-grid" style="margin-bottom:0;">
+              <div class="color-btn active" style="background: #00ffff;" onclick="setColor('#00ffff')"></div>
+              <div class="color-btn" style="background: #ff00ff;" onclick="setColor('#ff00ff')"></div>
+              <div class="color-btn" style="background: #00ff88;" onclick="setColor('#00ff88')"></div>
+              <div class="color-btn" style="background: #ffff00;" onclick="setColor('#ffff00')"></div>
+              <div class="color-btn" style="background: #ff0088;" onclick="setColor('#ff0088')"></div>
+              <div class="color-btn" style="background: #ffffff;" onclick="setColor('#ffffff')"></div>
+              <input type="color" id="customColor" value="#00ffff" style="width: 100%; height: 100%; padding:0; border:none; cursor:pointer;" onchange="setColor(this.value)">
+            </div>
+          </div>
+          
+          <div class="panel" id="effects-tab" style="display: none;">
+            <div class="effect-grid">
+              <button class="effect-btn active" onclick="setEffect('normal')">Normal</button>
+              <button class="effect-btn" onclick="setEffect('glow')">Glow</button>
+              <button class="effect-btn" onclick="setEffect('blur')">Blur</button>
+              <button class="effect-btn" onclick="setEffect('rainbow')">Rainbow</button>
+              <button class="effect-btn" onclick="setEffect('particle')">Particle</button>
+              <button class="effect-btn" onclick="setEffect('trail')">Trail</button>
+            </div>
+          </div>
         </div>
 
         <div class="canvas-wrapper" style="flex:1;">
+          <div id="camera-close-btn" style="display: none; position: absolute; top: 10px; right: 10px; z-index: 100;">
+            <button onclick="toggleCamera()" style="background: #ff0088; padding: 8px 16px;">
+              ✕ Close Camera
+            </button>
+          </div>
           <canvas id="game-canvas"></canvas>
           <video id="video" width="640" height="480"></video>
           <div class="hand-indicator" id="handIndicator"></div>
@@ -1071,7 +1162,7 @@
 
       // Disable drawing tools
       const canvasWrapper = document.querySelector('.canvas-wrapper');
-      const gameTools = document.querySelector('.game-tools');
+      const gameTools = document.querySelector('.button-row');
       if (canvasWrapper) canvasWrapper.style.pointerEvents = 'none';
       if (gameTools) {
         gameTools.style.opacity = '0.5';
@@ -1150,9 +1241,12 @@
 
       canvasWidth = rect.width;
       canvasHeight = rect.height;
+      
+      // Update canvas resolution
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
+      // Prevent image loss on resize
       ctx.fillStyle = '#000a1a';
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
@@ -1163,6 +1257,7 @@
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('orientationchange', resizeCanvas);
 
     // ============= BRUSH SETTINGS =============
     let brushSize = 10;
@@ -1334,21 +1429,21 @@
 
       const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 
-      if (distance < 1) {
+      // Always draw something - don't skip small movements
+      if (distance < 0.1) {
         drawBrush(x2, y2, pressure);
         return;
       }
 
+      // Interpolate between points for smooth line
       const steps = Math.ceil(distance);
-      const stepSize = 1 / steps;
 
-      for (let t = 0; t <= 1; t += stepSize) {
+      for (let i = 0; i <= steps; i++) {
+        const t = steps === 0 ? 0 : i / steps;
         const x = x1 + (x2 - x1) * t;
         const y = y1 + (y2 - y1) * t;
         drawBrush(x, y, pressure);
       }
-
-      drawBrush(x2, y2, pressure);
     }
 
     // ============= MOUSE EVENTS =============
@@ -1431,6 +1526,7 @@
 
       const now = Date.now();
 
+      const SMOOTHING_FACTOR = 0.75;
       if (handDetected) {
         // Initialize smoothed values on first detection
         if (smoothedX === 0 && smoothedY === 0) {
@@ -1439,8 +1535,8 @@
         }
 
         // Apply exponential smoothing (0.75 factor for better stability)
-        smoothedX = smoothedX * 0.75 + targetX * 0.25;
-        smoothedY = smoothedY * 0.75 + targetY * 0.25;
+        smoothedX = smoothedX * SMOOTHING_FACTOR + targetX * (1 - SMOOTHING_FACTOR);
+        smoothedY = smoothedY * SMOOTHING_FACTOR + targetY * (1 - SMOOTHING_FACTOR);
 
         handX = Math.max(0, Math.min(canvasWidth, smoothedX));
         handY = Math.max(0, Math.min(canvasHeight, smoothedY));
@@ -1520,6 +1616,8 @@
 
     // ============= CAMERA CONTROL =============
     async function toggleCamera() {
+      const closeBtn = document.getElementById('camera-close-btn');
+      
       if (cameraActive) {
         // FIX #1 — stop camera robustly
         if (mpCamera) {
@@ -1532,6 +1630,7 @@
           video.srcObject = null;
         }
         cameraActive = false;
+        if (closeBtn) closeBtn.style.display = 'none'; // Hide close button
         video.style.display = 'none';
         handIndicator.style.display = 'none';
         lastX = lastY = 0;
@@ -1543,7 +1642,7 @@
         handLostCounter = 0;
         statusDiv.textContent = '🖱️ Ready';
         statusDiv.classList.remove('active');
-        cameraBtn.textContent = '📷 Enable Hand Camera';
+        cameraBtn.textContent = '📷 Camera';
         cameraInfo.textContent = '✅ Stopped';
         cameraInfo.style.color = '#00ff88';
       } else {
@@ -1568,9 +1667,10 @@
 
           video.style.display = 'block';
           cameraActive = true;
+          if (closeBtn) closeBtn.style.display = 'block'; // Show close button
           statusDiv.textContent = '👋 Hand Mode';
           statusDiv.classList.add('active');
-          cameraBtn.textContent = '⏹️ Stop Camera';
+          cameraBtn.textContent = '⏹️ Stop';
           cameraInfo.textContent = '✅ Camera on!';
           cameraInfo.style.color = '#00ff88';
           drawLoop(); // start render loop
@@ -1582,6 +1682,22 @@
     }
 
     // ============= CONTROLS =============
+    function showTab(tabName) {
+      // Hide all tabs
+      document.getElementById('brush-tab').style.display = 'none';
+      document.getElementById('colors-tab').style.display = 'none';
+      document.getElementById('effects-tab').style.display = 'none';
+      
+      // Show selected tab
+      document.getElementById(tabName + '-tab').style.display = 'block';
+      
+      // Update active button
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+
     function updateBrushSize(value) {
       brushSize = parseInt(value);
       const valDisplay = document.getElementById('brushSizeVal');
